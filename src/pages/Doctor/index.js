@@ -1,12 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {ScrollView, StyleSheet, Text, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View, FlatList} from 'react-native';
 import {Gap, HomeProfile, NewsItem} from '../../components';
 import {Fire} from '../../config';
 import {colors, fonts, showError, getData} from '../../utils';
 import {ILNullPhoto} from '../../assets';
 
 const Doctor = ({navigation}) => {
-  const [news, setNews] = useState([]);
+  const [data, setData] = useState([]);
+  const ApiHealth =
+    'http://newsapi.org/v2/top-headlines?country=id&apiKey=bd53b9de417b41dbbe9eedb128524d88';
   const [profile, setProfile] = useState({
     photo: ILNullPhoto,
     fullName: '',
@@ -14,28 +16,26 @@ const Doctor = ({navigation}) => {
   });
 
   useEffect(() => {
-    getNews();
     navigation.addListener('focus', () => {
       getUserData();
     });
   }, [navigation]);
 
-  const getNews = () => {
-    Fire.database()
-      .ref('news/')
-      .once('value')
-      .then(res => {
-        if (res.val()) {
-          setNews(res.val());
-        }
+  // Api===================
+
+  useEffect(() => {
+    fetch(ApiHealth)
+      .then((response) => response.json())
+      .then((json) => {
+        setData(json.articles);
       })
-      .catch(err => {
-        showError(err.message);
-      });
-  };
+      .catch((error) => console.error(error));
+  }, []);
+
+  // ========================
 
   const getUserData = () => {
-    getData('user').then(res => {
+    getData('user').then((res) => {
       const data = res;
       data.photo = res?.photo?.length > 1 ? {uri: res.photo} : ILNullPhoto;
       setProfile(res);
@@ -56,16 +56,17 @@ const Doctor = ({navigation}) => {
           <View style={styles.wrapperSection}>
             <Text style={styles.sectionLabel}>Good News</Text>
           </View>
-          {news.map(item => {
-            return (
+          <FlatList
+            data={data}
+            keyExtractor={({id}, index) => id}
+            renderItem={({item}) => (
               <NewsItem
-                key={item.id}
                 title={item.title}
-                date={item.date}
-                image={item.image}
+                date={item.publishedAt}
+                image={{uri: item.urlToImage}}
               />
-            );
-          })}
+            )}
+          />
           <Gap height={30} />
         </ScrollView>
       </View>

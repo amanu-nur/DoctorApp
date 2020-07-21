@@ -1,15 +1,15 @@
 import React from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
-import {colors, fonts} from '../../../utils';
+import {colors, fonts, LimitString} from '../../../utils';
 
 const NewsItem = ({title, date, image}) => {
   return (
     <View style={styles.container}>
       <View style={styles.titleWrapper}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}> {LimitString(title, 40)}</Text>
         <Text style={styles.date}>{date}</Text>
       </View>
-      <Image source={{uri: image}} style={styles.image} />
+      <Image source={image} style={styles.image} />
     </View>
   );
 };
